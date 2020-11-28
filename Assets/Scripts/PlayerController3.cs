@@ -5,7 +5,7 @@ using static StateMachine<PlayerController3>;
 
 public class PlayerController3 : StateMachineInstance<PlayerController3>
 {
-    [HideInInspector] public bool isGrounded;
+    string someTestStringToTestIfMySMIReferencesCorrectly = "woooooooot";
 
     private void Awake()
     {
@@ -22,7 +22,7 @@ public class PlayerController3 : StateMachineInstance<PlayerController3>
         walking
             .Enter(smi => smi.Test())
             .Transition(jumping, SomeCondition)
-            .Exit(smi => Debug.Log("<walking leave>"));
+            .Exit(smi => Debug.Log("<walking leave>" + someTestStringToTestIfMySMIReferencesCorrectly));
         jumping
             .Transition(walking, () => !SomeCondition())
             .Enter(smi => Debug.Log("<jumping enter>"));

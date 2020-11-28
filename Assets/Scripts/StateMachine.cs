@@ -136,7 +136,6 @@ public class StateMachine<SMIType> where SMIType : StateMachineInstance
 
         public State Enter(Callback callback)
         {
-            Debug.Log("entered state " + name);
             if (enterActions == null)
                 enterActions = new List<object>();
 
@@ -146,7 +145,6 @@ public class StateMachine<SMIType> where SMIType : StateMachineInstance
 
         public State Exit(Callback callback)
         {
-            Debug.Log("exiting state " + name);
             if (exitActions == null)
                 exitActions = new List<object>();
 
