@@ -1,44 +1,101 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-// based on Unity Guide, not used atm
-public class  PlayerController : PhysicsObject
+public class PlayerController : MonoBehaviour
 {
-    public float jumpTakeOffSpeed = 7;
-    public float maxSpeed = 7;
-    public float deceleration = 0.5f;
-    Collider2D boxCollider;
+    [SerializeField] float Speed = 7f;
+    [SerializeField] float Jumps = 8;
+    [SerializeField] float JumpSpeed = 7f;
+    [SerializeField] float LedgeClimbSpeed = 0.3f;
+    [SerializeField] PlayerCollisions collisions;
+
+    float jumpCounter = 0;
+    bool isGrounded = false;
+    bool stoppedJumping = false;
+    bool facingLeft;
+
+    TextMesh debug;
+
+    Rigidbody2D rigidBody;
+
+    public PlayerController Instance { get; set; }
+
+    void OnEnable() => rigidBody = GetComponent<Rigidbody2D>();
 
     private void Awake()
     {
-        boxCollider = GetComponent<Collider2D>();
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(this);
+        }
+        else Destroy(this);
+        debug = DebugUtil.DrawText(transform.position, "", Color.red);
+        debug.transform.SetParent(transform);
+
+        isGrounded = collisions.CheckGrounded();
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+
+    // TODO: move some of this to fixed update
+    private void Update()
     {
-        if(collision.gameObject.tag == "Damage")
+        float horizontalMovement = Input.GetAxis("Horizontal");
+
+        Move(horizontalMovement);
+
+        if (collisions.CheckGrounded())
         {
-            boxCollider.enabled = false;
+            if (!isGrounded)
+                Land();
         }
+        else isGrounded = false;
+
+        if (Input.GetButton("Jump"))
+            Jump();
+
+        Flip(horizontalMovement);
     }
 
-    protected override void ComputeVelocity()
+    private void Move(float movement)
     {
-        Vector2 move = Vector2.zero;
-        move.x = Input.GetAxis("Horizontal");
-
-        if(Input.GetButtonDown("Jump") && grounded)
-        {
-            velocity.y = jumpTakeOffSpeed;
-        }
-        else if(Input.GetButtonUp("Jump"))
-        {
-            if(velocity.y > 0)
-            {
-                velocity.y *= deceleration;
-            }
-        }
-
-        targetVelocity = move * maxSpeed;
+        rigidBody.velocity = new Vector2(movement * Speed, rigidBody.velocity.y);
+        if (movement != 0 && CanClimb(movement))
+            ClimbStairs(movement);
     }
+
+    void Jump()
+    {
+        if (CanJump())
+        {
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, JumpSpeed);
+            jumpCounter++;
+        }
+        else
+            stoppedJumping = true;
+    }
+    
+    void ClimbStairs(float movement)
+    {
+        rigidBody.velocity = new Vector2(rigidBody.velocity.x, rigidBody.velocity.y + LedgeClimbSpeed);
+    }
+    
+    void Land()
+    {
+        jumpCounter = 0;
+        stoppedJumping = false;
+        isGrounded = true;
+    }
+
+    void Flip(float x)
+    {
+        if (x != 0 && x < 0 != facingLeft)
+        {
+            Vector3 scale = transform.localScale;
+            scale.x *= -1f;
+            GetComponent<AnimController>().transform.localScale = scale;
+            facingLeft = !facingLeft;
+        }
+    }
+
+    bool CanJump() => (jumpCounter < Jumps || isGrounded) && !stoppedJumping;
+    bool CanClimb(float dir) => collisions.CanClimbStairs(dir);
 }

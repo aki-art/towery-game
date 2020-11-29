@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,6 +42,17 @@ public class StateMachine<SMIType> where SMIType : StateMachineInstance
     public void RegisterState(State state)
     {
         states[state.name] = state;
+    }
+
+    public void ScheduleState(State state, float time)
+    {
+        Game.Instance.StartCoroutine(SetStateDelayed(state, time));
+    }
+
+    IEnumerator SetStateDelayed(State state, float time)
+    {
+        yield return new WaitForSeconds(time);
+        SetState(state);
     }
 
     public void SetState(State state)
@@ -125,7 +137,7 @@ public class StateMachine<SMIType> where SMIType : StateMachineInstance
             this.smi = smi;
         }
 
-        public State Tick(Callback callback)
+        public State Update(Callback callback)
         {
             if (tickActions == null)
                 tickActions = new List<object>();
@@ -161,6 +173,12 @@ public class StateMachine<SMIType> where SMIType : StateMachineInstance
         public State GoTo(State state)
         {
             smi.sm.SetState(state);
+            return this;
+        }
+
+        public State GoToInSeconds(State state, float seconds)
+        {
+            smi.sm.ScheduleState(state, seconds);
             return this;
         }
     }

@@ -5,6 +5,7 @@ public class Game : MonoBehaviour
 {
     [SerializeField] private Tower tower;
     public static Game Instance { get; private set; }
+    public bool TransformTower = true;
 
     public Tower Tower => tower;
 

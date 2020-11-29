@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 public class Platform : MonoBehaviour
 {
@@ -9,5 +10,14 @@ public class Platform : MonoBehaviour
         // y this break the sprite completely tho
         //GetComponent<AnimController>().Sprite.color = def.color;
 
+    }
+
+
+    [DrawGizmo(GizmoType.NonSelected)]
+    void DrawTriggerZone()
+    {
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(transform.position, collider.size);
     }
 }

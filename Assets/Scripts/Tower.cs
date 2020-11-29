@@ -27,8 +27,12 @@ public class Tower : MonoBehaviour
 
     public Vector3 TranslatePosition(Vector3 pos)
     {
-        float place = Mathf.PI * 2 * ((followTarget.position.x - pos.x) * cellWidth / width);
-        return new Vector3(Mathf.Sin(place) * radius, pos.y, Mathf.Cos(place) * radius);
+        if (Game.Instance.TransformTower)
+        {
+            float place = Mathf.PI * 2 * ((followTarget.position.x - pos.x) * cellWidth / width);
+            return new Vector3(Mathf.Sin(place) * radius, pos.y, Mathf.Cos(place) * radius);
+        }
+        else return pos;
     }
     
 }
